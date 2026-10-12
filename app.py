@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 
 app = FastAPI(title="CloudOps Lab")
 
@@ -13,3 +14,5 @@ def health():
         "status": "healthy",
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
+
+Instrumentator().instrument(app).expose(app)

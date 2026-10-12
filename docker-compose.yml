@@ -1,6 +1,8 @@
+
 services:
   app:
-    image: ghcr.io/mbanovic20/cloudops-lab:latest
+    build: .
+    image: cloudops-lab:local
     container_name: cloudops-lab
     ports:
       - "8000:8000"
@@ -11,3 +13,34 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: cloudops-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: cloudops-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus-data:
+  grafana-data:
