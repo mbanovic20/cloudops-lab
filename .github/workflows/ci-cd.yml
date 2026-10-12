@@ -1,4 +1,4 @@
-name: CloudOps Lab CI
+name: CloudOps Lab CI/CD
 
 on:
   push:
