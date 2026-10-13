@@ -1,8 +1,9 @@
 replicaCount: 3
 
 image:
-  repository: cloudops-lab
-  tag: local
+  repository: ghcr.io/mbanovic20/cloudops-lab
+  # Commit SHA of the image published by the CI pipeline.
+  tag: 294aefc735604cbc05beee87253b3e64f401271a
   pullPolicy: IfNotPresent
 
 service:

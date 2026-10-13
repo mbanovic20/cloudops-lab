@@ -23,6 +23,7 @@ flowchart LR
         argo[Argo CD] -->|sync Helm chart| app[cloudops-lab<br/>Deployment + Service]
     end
     gh -->|watched by| argo
+    ghcr -->|image pull| app
 
     subgraph mon[Docker Compose]
         capp[cloudops-lab] -->|/metrics| prom[Prometheus]
@@ -92,12 +93,10 @@ environment the receiver would be Slack, Teams, e-mail or an on-call tool.
 
 ## Deploy to Kubernetes with GitOps
 
-Requires `kind`, `kubectl` and `helm`.
+Requires `kind` and `kubectl`.
 
 ```bash
 kind create cluster --name cloudops
-docker build -t cloudops-lab:local .
-kind load docker-image cloudops-lab:local --name cloudops
 
 kubectl create namespace argocd
 kubectl apply -n argocd --server-side \
@@ -118,9 +117,18 @@ kubectl -n argocd get application cloudops-lab
 kubectl -n cloudops get pods
 ```
 
-The chart uses the locally loaded image `cloudops-lab:local`. In a real setup
-it would point at the image the pipeline publishes to a registry, and a
-release would be a commit that changes the image tag.
+### Release a new version
+
+The chart pulls the image the pipeline publishes to GHCR, pinned by commit SHA
+in `helm/cloudops-lab/values.yaml`. The package is public, so the cluster
+needs no pull secret.
+
+1. Push the application change and wait for the **publish** job.
+2. Set `image.tag` in `values.yaml` to that commit's full SHA and push.
+3. Argo CD rolls the new image out. `git revert` of that commit rolls it back.
+
+The tag must point at an image that already exists in the registry, which is
+why the tag change is a separate commit.
 
 ## Infrastructure as Code (Azure)
 
@@ -157,3 +165,4 @@ On every push and pull request to `main`:
 - Ingress and TLS; the app is reached with `kubectl port-forward`.
 - Monitoring inside the cluster; Prometheus scrapes the Compose instance.
 - Secrets management and remote Terraform state.
+- Updating the image tag automatically; it is a manual commit.
