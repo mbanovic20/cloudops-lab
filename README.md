@@ -28,6 +28,7 @@ flowchart LR
     subgraph mon[Docker Compose]
         capp[cloudops-lab] -->|/metrics| prom[Prometheus]
         prom -->|alerts| am[Alertmanager] --> hook[Webhook logger]
+        am --> mail[Mailpit inbox]
         prom --> graf[Grafana dashboard]
     end
 ```
@@ -39,7 +40,7 @@ flowchart LR
 | `app.py`, `test_app.py` | FastAPI service with `/`, `/health`, `/metrics` and its tests |
 | `Dockerfile` | Image build; the app runs as a non-root user |
 | `docker-compose.yml` | App plus the monitoring stack |
-| `monitoring/` | Prometheus config and alert rules, Alertmanager config, Grafana provisioning and dashboard |
+| `monitoring/` | Prometheus config and alert rules, Alertmanager config (webhook and e-mail), Grafana provisioning and dashboard |
 | `helm/cloudops-lab/` | Helm chart: Deployment with probes, resource limits and a restricted security context, Service |
 | `argocd/application.yaml` | Argo CD Application that deploys the chart from this repository |
 | `terraform/` | Azure infrastructure: resource group, ACR, AKS, Log Analytics |
@@ -64,6 +65,7 @@ docker compose up -d --build
 | Application | http://localhost:8000 |
 | Prometheus | http://localhost:9090 |
 | Alertmanager | http://localhost:9093 |
+| Mailpit (alert e-mails) | http://localhost:8025 |
 | Grafana | http://localhost:3000 (dashboard "CloudOps Lab") |
 
 The Prometheus data source and the dashboard are provisioned from files in
@@ -88,8 +90,11 @@ docker compose logs -f alert-logger
 ```
 
 `HighHttpErrorRate` fires when more than 5% of requests fail for 2 minutes.
-Alertmanager forwards it to a small webhook receiver that prints it. In a real
-environment the receiver would be Slack, Teams, e-mail or an on-call tool.
+Alertmanager sends it to two places: a small webhook receiver that prints it,
+and an e-mail that lands in Mailpit, a local SMTP server with a web inbox at
+http://localhost:8025. Nothing leaves the machine and no credentials are
+needed. In a real environment the SMTP settings would point at a mail
+provider, or the receiver would be Slack, Teams or an on-call tool.
 
 ## Deploy to Kubernetes with GitOps
 
