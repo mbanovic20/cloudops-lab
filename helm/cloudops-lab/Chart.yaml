@@ -1,0 +1,6 @@
+apiVersion: v2
+name: cloudops-lab
+description: FastAPI demo application for the CloudOps lab
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
