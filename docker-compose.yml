@@ -1,4 +1,3 @@
-
 services:
   app:
     build: .
@@ -6,6 +5,8 @@ services:
     container_name: cloudops-lab
     ports:
       - "8000:8000"
+    environment:
+      ENABLE_TEST_ENDPOINTS: "true"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
@@ -13,9 +14,10 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+      start_interval: 2s
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.15.0
     container_name: cloudops-prometheus
     ports:
       - "9090:9090"
@@ -31,7 +33,7 @@ services:
         condition: service_healthy
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:13.2.3
     container_name: cloudops-grafana
     ports:
       - "3000:3000"
