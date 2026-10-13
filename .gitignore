@@ -3,3 +3,12 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .env
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+
+# Private notes
+interview-notes.md
