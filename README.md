@@ -96,6 +96,36 @@ http://localhost:8025. Nothing leaves the machine and no credentials are
 needed. In a real environment the SMTP settings would point at a mail
 provider, or the receiver would be Slack, Teams or an on-call tool.
 
+### Optional: real e-mail
+
+The default setup sends e-mail only to Mailpit. To also receive alerts in a
+real Gmail inbox, without putting the password in Git:
+
+1. Create an app password for the Gmail account (requires 2-step verification)
+   at https://myaccount.google.com/apppasswords.
+2. Create the two local files, both ignored by Git:
+
+   ```bash
+   cp monitoring/alertmanager.gmail.example.yml monitoring/alertmanager.local.yml
+   sed -i 's/YOUR_ADDRESS@gmail.com/<your address>/' monitoring/alertmanager.local.yml
+   mkdir -p secrets && nano secrets/gmail_app_password   # paste the app password
+   ```
+
+3. Start Alertmanager with the extra Compose file:
+
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.gmail.yml up -d --force-recreate alertmanager
+   ```
+
+Alertmanager reads the password from the mounted file (`auth_password_file`),
+so it appears neither in the configuration nor in the repository. Send a test
+notification without waiting for a real alert:
+
+```bash
+docker exec cloudops-alertmanager amtool alert add TestAlert severity=info \
+  --annotation=summary=Test --alertmanager.url=http://localhost:9093
+```
+
 ## Deploy to Kubernetes with GitOps
 
 Requires `kind` and `kubectl`.

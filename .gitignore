@@ -10,5 +10,9 @@ __pycache__/
 *.tfstate.*
 *.tfvars
 
+# Local e-mail credentials and config
+secrets/
+monitoring/alertmanager.local.yml
+
 # Private notes
 interview-notes.md

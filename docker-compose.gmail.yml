@@ -1,0 +1,7 @@
+# Optional: adds a real Gmail receiver on top of docker-compose.yml.
+# See "Optional: real e-mail" in the README.
+services:
+  alertmanager:
+    volumes:
+      - ./monitoring/alertmanager.local.yml:/etc/alertmanager/alertmanager.yml:ro
+      - ./secrets/gmail_app_password:/etc/alertmanager/gmail_app_password:ro

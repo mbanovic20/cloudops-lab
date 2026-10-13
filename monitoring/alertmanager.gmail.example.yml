@@ -1,0 +1,28 @@
+# Example: alertmanager.yml plus a real Gmail receiver. See "Optional: real e-mail" in the README.
+global:
+  smtp_smarthost: mailpit:1025
+  smtp_from: alertmanager@cloudops-lab.local
+  smtp_require_tls: false
+
+route:
+  receiver: default
+  group_by: ["alertname"]
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 1h
+
+receivers:
+  - name: default
+    webhook_configs:
+      - url: http://alert-logger:5001/
+        send_resolved: true
+    email_configs:
+      - to: oncall@cloudops-lab.local
+        send_resolved: true
+      - to: YOUR_ADDRESS@gmail.com
+        from: YOUR_ADDRESS@gmail.com
+        smarthost: smtp.gmail.com:587
+        auth_username: YOUR_ADDRESS@gmail.com
+        auth_password_file: /etc/alertmanager/gmail_app_password
+        require_tls: true
+        send_resolved: true
