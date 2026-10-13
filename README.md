@@ -39,7 +39,7 @@ flowchart LR
 | `Dockerfile` | Image build; the app runs as a non-root user |
 | `docker-compose.yml` | App plus the monitoring stack |
 | `monitoring/` | Prometheus config and alert rules, Alertmanager config, Grafana provisioning and dashboard |
-| `helm/cloudops-lab/` | Helm chart: Deployment with probes and resource limits, Service |
+| `helm/cloudops-lab/` | Helm chart: Deployment with probes, resource limits and a restricted security context, Service |
 | `argocd/application.yaml` | Argo CD Application that deploys the chart from this repository |
 | `terraform/` | Azure infrastructure: resource group, ACR, AKS, Log Analytics |
 | `.github/workflows/ci-cd.yml` | CI/CD pipeline |
@@ -149,8 +149,8 @@ On every push and pull request to `main`:
 2. **validate** lints the Helm chart and checks the Prometheus, Alertmanager
    and Terraform configuration.
 3. **docker-build** builds the image.
-4. **publish** (pushes to `main` only) pushes the image to GHCR tagged
-   `latest` and with the commit SHA.
+4. **publish** (pushes to `main` only, after all three jobs above pass) pushes
+   the image to GHCR tagged `latest` and with the commit SHA.
 
 ## Not covered
 
