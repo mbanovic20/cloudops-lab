@@ -32,6 +32,25 @@ services:
       app:
         condition: service_healthy
 
+  alertmanager:
+    image: prom/alertmanager:v0.34.1
+    container_name: cloudops-alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    restart: unless-stopped
+    depends_on:
+      - alert-logger
+
+  alert-logger:
+    image: python:3.14-slim
+    container_name: cloudops-alert-logger
+    command: ["python", "/app/webhook_logger.py"]
+    volumes:
+      - ./monitoring/webhook_logger.py:/app/webhook_logger.py:ro
+    restart: unless-stopped
+
   grafana:
     image: grafana/grafana:13.2.3
     container_name: cloudops-grafana
@@ -39,6 +58,8 @@ services:
       - "3000:3000"
     volumes:
       - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/etc/grafana/dashboards:ro
     restart: unless-stopped
     depends_on:
       - prometheus
