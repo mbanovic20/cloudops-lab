@@ -7,6 +7,12 @@ variable "prefix" {
   description = "Name prefix shared by all resources."
   type        = string
   default     = "cloudopslab"
+
+  # The registry name is built from the prefix and allows only these characters.
+  validation {
+    condition     = can(regex("^[a-z0-9]{3,20}$", var.prefix))
+    error_message = "The prefix must be 3-20 lowercase letters or digits."
+  }
 }
 
 variable "location" {
